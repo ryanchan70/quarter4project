@@ -1,27 +1,60 @@
 import java.net.*;
 import java.io.*;
 
-public class ServerThread implements Runnable{
+public class ServerThread extends Thread {
     private Socket clientSocket;
-    public ServerThread(Socket clientSocket){
+    private PrintWriter out;
+    private BufferedReader in;
+    private boolean ready;
+
+    public ServerThread(Socket clientSocket) {
         this.clientSocket = clientSocket;
+        this.ready = false;
     }
 
-    public void run(){
-        System.out.println(Thread.currentThread().getName() + ": connection opened.");
+    public void run() {
         try {
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            //Sends a message
-            out.println( "Connection Successful!");
+            // Sends a message
+            sendMessage("Connection Successful!");
 
-            //Clears and close the output stream.
-            out.flush();
+            // Continuously listen for client messages
+            String clientMessage;
+            while ((clientMessage = in.readLine()) != null) {
+                System.out.println(Thread.currentThread().getName() + ": received message: " + clientMessage);
+                // Process client messages here
+
+                System.out.println("Server receives " + clientMessage);
+                if (clientMessage.equals("READY")) {
+                    ready = true;
+                    Server.incrementReadyCount();
+                } else if (clientMessage.equals("NOTREADY")) {
+                    ready = false;
+                    Server.decrementReadyCount();
+                }
+            }
+
+            in.close();
             out.close();
+            clientSocket.close();
+
+            // Notify the server that this client thread is being removed
+            Server.removeClientThread(this);
             System.out.println(Thread.currentThread().getName() + ": connection closed.");
-        } catch (IOException ex){
+        } catch (IOException ex) {
             System.out.println("Error listening for a connection");
             System.out.println(ex.getMessage());
         }
+    }
+
+    public void sendMessage(String message) {
+        out.println(message);
+        out.flush();
+    }
+
+    public boolean isReady() {
+        return ready;
     }
 }
