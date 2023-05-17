@@ -8,12 +8,13 @@ public class Server {
     private static int readyCount = 0;
     private static int clientCount = 0;
     private static boolean gameStart;
+    private static Obstacle[] ObstacleList = {new Obstacle(200,500,10,10),new Obstacle(500,500,10,10),new Obstacle(800,500,10,10)};
 
-    public Server() {
+    public Server(){
         gameStart = false;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         int portNumber = 1024;
         ServerSocket serverSocket = new ServerSocket(portNumber);
 
@@ -32,6 +33,17 @@ public class Server {
 
             // Broadcast the updated client count and ready count to all clients
             broadcastReadyMessage();
+            if (gameStart) {
+                while (true) {
+                    Thread.sleep(100);
+                    for (int i = 0; i < 3; i++) {
+                        ObstacleList[i].setX(ObstacleList[i].getX() - 5);
+                    }
+                    for (int i = 0; i < 3; i++) {
+                        broadcastObstacleMessage(ObstacleList[i].getX(), ObstacleList[i].getY());
+                    }
+                }
+            }
         }
     }
 
@@ -48,13 +60,21 @@ public class Server {
     public static void broadcastReadyMessage() {
         int clientCount = clientThreads.size();
         String msg = "READY " + readyCount + " " + clientCount;
-        if(readyCount == clientCount) {
+        if (readyCount == clientCount){
             gameStart = true;
         }
         for (ServerThread thread : clientThreads) {
             thread.sendMessage(msg);
         }
         System.out.println("server -> serverthread : " + msg);
+
+    }
+
+    public static void broadcastObstacleMessage(int x, int y){
+        for (ServerThread thread : clientThreads){
+            thread.sendMessage("OBSTACLE" + " " + x + " " + y);
+        }
+        System.out.println("Obstacle sent");
     }
 
     public static void incrementReadyCount() {
