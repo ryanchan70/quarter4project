@@ -56,6 +56,10 @@ public class ClientScreen extends JPanel implements ActionListener {
     public void updateReadyMessage(int numReady, int numClients) {
         this.numReady = numReady;
         this.numClients = numClients;
+        if(numReady == numClients) {
+            startGame = true;
+            startButton.setVisible(false);
+        }
         repaint();
     }
 
