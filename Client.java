@@ -51,6 +51,9 @@ public class Client extends JPanel {
                         client.clientScreen.updateReadyMessage(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
                     }
                     System.out.println("serverthread -> client: " + response);
+                    if (response.split(" ")[0].equals("OBSTACLE")){
+                        client.clientScreen.obstacleSent();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
