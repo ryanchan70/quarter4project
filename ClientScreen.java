@@ -10,7 +10,7 @@ public class ClientScreen extends JPanel implements ActionListener {
     private Client client;
     private JButton startButton;
     private int numReady, numClients;
-    private boolean ready;
+    private boolean ready, startGame;
 
     public ClientScreen() {
         startButton = new JButton("Start");
@@ -19,6 +19,7 @@ public class ClientScreen extends JPanel implements ActionListener {
         startButton.addActionListener(this);
 
         ready = false;
+        startGame = false;
 
         setLayout(null);
         setFocusable(true);
@@ -30,15 +31,19 @@ public class ClientScreen extends JPanel implements ActionListener {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setColor(new Color(38, 41, 45));
-        g.fillRect(0, 0, 800, 600);
-        g.setColor(Color.white);
-        g.setFont(new Font("SansSerif", Font.BOLD, 40));
-        g.drawString("Welcome!",300,85);
-        g.setFont(new Font("SansSerif", Font.BOLD, 20));
-        g.drawString("Please wait for all players to press start.",170,175);
-        g.drawString(numReady + "/" + numClients + " players ready", 300, 250);
-        System.out.println("clientscreen: " + numReady + " " + numClients);
+        if(!startGame) {
+            g.setColor(new Color(38, 41, 45));
+            g.fillRect(0, 0, 800, 600);
+            g.setColor(Color.white);
+            g.setFont(new Font("SansSerif", Font.BOLD, 40));
+            g.drawString("Welcome!", 300, 85);
+            g.setFont(new Font("SansSerif", Font.BOLD, 20));
+            g.drawString("Please wait for all players to press start.", 170, 175);
+            g.drawString(numReady + "/" + numClients + " players ready", 300, 250);
+            System.out.println("clientscreen: " + numReady + " " + numClients);
+        } else {
+            //show player sprite and obstacles
+        }
     }
 
     public void actionPerformed(ActionEvent e) {
