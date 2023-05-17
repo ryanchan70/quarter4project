@@ -7,6 +7,11 @@ public class Server {
     private static List<ServerThread> clientThreads = new ArrayList<>();
     private static int readyCount = 0;
     private static int clientCount = 0;
+    private static boolean gameStart;
+
+    public Server() {
+        gameStart = false;
+    }
 
     public static void main(String[] args) throws IOException {
         int portNumber = 1024;
@@ -43,6 +48,9 @@ public class Server {
     public static void broadcastReadyMessage() {
         int clientCount = clientThreads.size();
         String msg = "READY " + readyCount + " " + clientCount;
+        if(readyCount == clientCount) {
+            gameStart = true;
+        }
         for (ServerThread thread : clientThreads) {
             thread.sendMessage(msg);
         }
