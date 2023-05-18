@@ -26,13 +26,14 @@ public class ServerThread extends Thread {
                 System.out.println(Thread.currentThread().getName() + ": received message: " + clientMessage);
                 // Process client messages here
 
-                System.out.println("Server receives " + clientMessage);
                 if (clientMessage.equals("READY")) {
                     ready = true;
                     Server.incrementReadyCount();
                 } else if (clientMessage.equals("NOTREADY")) {
                     ready = false;
                     Server.decrementReadyCount();
+                } else if (clientMessage.equals("STARTGAME")) {
+                    Server.setGameStart(true);
                 }
             }
 
