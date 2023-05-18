@@ -1,14 +1,14 @@
 public class Powerup {
     private int x;
     private int y;
-    private int length;
+    private int width;
     private int height;
 
-    public Powerup(int a, int b, int c, int d){
-        x = a;
-        y = b;
-        length = c;
-        height = d;
+    public Powerup(int x, int y, int width, int height){
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
     public int getX(){
@@ -19,8 +19,16 @@ public class Powerup {
         return y;
     }
 
-    public int getLength(){
-        return length;
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getWidth(){
+        return width;
     }
 
     public int getHeight(){
