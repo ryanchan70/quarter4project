@@ -33,7 +33,6 @@ public class Client extends JPanel {
         Client client = new Client(serverAddress, serverPort);
         client.connect();
 
-        // Start the ClientScreen
         client.startClientScreen();
 
         // Start receiving updates from the server in a separate thread
@@ -49,11 +48,13 @@ public class Client extends JPanel {
                         String[] info = response.split("\\s+");
                         System.out.println("serverthread -> client: " + Arrays.toString(info));
                         client.clientScreen.updateReadyMessage(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
-                    }
-                    System.out.println("serverthread -> client: " + response);
-                    if (response.split(" ")[0].equals("OBSTACLE")){
-                        client.clientScreen.obstacleSent();
-                    }
+                    } else if(response.startsWith("OBSTACLES")) {
+                        response = response.substring(10);
+                        String[] info = response.split("\\s+");
+                        System.out.println("serverthread -> client: " + Arrays.toString(info));
+                        client.clientScreen.updateObstacles(info);
+                    } else
+                        System.out.println("serverthread -> client: " + response);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,6 +85,7 @@ public class Client extends JPanel {
         }
     }
 
+    //client -> serverthread
     public void send(String message) {
         writer.println(message);
         System.out.println("client -> serverthread: " + message);
