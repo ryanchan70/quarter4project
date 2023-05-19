@@ -7,8 +7,9 @@ public class Server {
     private static List<ServerThread> clientThreads = new ArrayList<>();
     private static int readyCount = 0;
     private static int clientCount = 0;
+    private static int remainingPlayers = -1;
     private static volatile boolean gameStart;
-    private static Obstacle[] obstacles = {new Obstacle(200,500,10,10),new Obstacle(500,500,10,10),new Obstacle(800,500,10,10)};
+    private static Obstacle[] obstacles = {new Obstacle(300,370,15,30),new Obstacle(500,370,15,30),new Obstacle(800,370,15,30)};
 
     public Server(){
         gameStart = false;
@@ -26,10 +27,11 @@ public class Server {
 
                     try {
                         Socket clientSocket = serverSocket.accept();
-                        ServerThread thread = new ServerThread(clientSocket);
+                        ServerThread thread = new ServerThread(clientSocket, clientCount);
                         clientThreads.add(thread);
                         thread.start();
                         clientCount++;
+
                     } catch (SocketTimeoutException ignored) {
                     }
 
@@ -49,7 +51,7 @@ public class Server {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("waiting");
+            System.out.println("waiting for a connection");
         }
 
         System.out.println("GAME HAS STARTED");
@@ -58,12 +60,16 @@ public class Server {
         clientAcceptanceThread.interrupt();
 
         // Start the game logic
+        remainingPlayers = clientCount;
         while (gameStart) {
             try {
                 Thread.sleep(20);
 
                 for (int i = 0; i < 3; i++) {
                     obstacles[i].setX(obstacles[i].getX() - 5);
+                    if(obstacles[i].getX() < -obstacles[i].getWidth()) {
+                        obstacles[i].setX(900);
+                    }
                 }
 
                 broadcastObstacleMessage();
@@ -94,6 +100,16 @@ public class Server {
         }
         System.out.println("server -> serverthread : " + msg);
 
+    }
+
+    public static void playerLoses(int id) {
+        remainingPlayers--;
+        for (ServerThread thread : clientThreads) {
+            System.out.println("threadid vs id: " + thread.getID() + " " + id);
+            if (thread.getID() != id) {
+                thread.sendMessage("PLAYERLOST " + id);
+            }
+        }
     }
 
     public static void broadcastObstacleMessage(){
