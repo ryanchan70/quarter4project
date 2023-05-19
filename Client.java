@@ -12,7 +12,6 @@ public class Client extends JPanel {
     private BufferedReader reader;
     private PrintWriter writer;
     private ClientScreen clientScreen;
-
     private boolean ready;
 
     public Client(String serverAddress, int serverPort) {
@@ -40,21 +39,25 @@ public class Client extends JPanel {
             try {
                 String response;
                 while ((response = client.reader.readLine()) != null) {
-                    // Process the received update from the server
-                    // Update the clientScreen or perform any necessary actions
 
+                    // SERVER RESPONSE HANDLING
                     if(response.startsWith("READY")) {
                         response = response.substring(6);
                         String[] info = response.split("\\s+");
-                        System.out.println("serverthread -> client: " + Arrays.toString(info));
+                        //System.out.println("serverthread -> client: " + Arrays.toString(info));
                         client.clientScreen.updateReadyMessage(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
                     } else if(response.startsWith("OBSTACLES")) {
                         response = response.substring(10);
                         String[] info = response.split("\\s+");
-                        System.out.println("serverthread -> client: " + Arrays.toString(info));
+                        //System.out.println("serverthread -> client: " + Arrays.toString(info));
                         client.clientScreen.updateObstacles(info);
-                    } else
+                    } else if(response.startsWith("PLAYERLOST")) {
+                        response = response.substring(11);
                         System.out.println("serverthread -> client: " + response);
+                        client.clientScreen.updateOpponentStatus(Integer.parseInt(response));
+                    } else {
+                        //System.out.println("serverthread -> client: " + response);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
