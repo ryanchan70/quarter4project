@@ -5,8 +5,8 @@ public class Obstacle {
     private int height;
 
     public Obstacle() {
-        width = 10;
-        height = 10;
+        width = 15;
+        height = 30;
     }
 
     public Obstacle(int x, int y, int width, int height){
@@ -38,12 +38,5 @@ public class Obstacle {
 
     public int getHeight(){
         return height;
-    }
-
-    public boolean checkCollision(int playerX, int playerY){
-        if (playerY < y && playerX > x && playerX < x + height){
-            return true;
-        }
-        return false;
     }
 }
