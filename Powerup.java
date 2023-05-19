@@ -34,11 +34,4 @@ public class Powerup {
     public int getHeight(){
         return height;
     }
-
-    public boolean checkCollision(int playerX, int playerY){
-        if (playerY < y && playerX > x && playerX < x + height){
-            return true;
-        }
-        return false;
-    }
 }
