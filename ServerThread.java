@@ -6,10 +6,12 @@ public class ServerThread extends Thread {
     private PrintWriter out;
     private BufferedReader in;
     private boolean ready;
+    private int id;
 
-    public ServerThread(Socket clientSocket) {
+    public ServerThread(Socket clientSocket, int id) {
         this.clientSocket = clientSocket;
         this.ready = false;
+        this.id = id;
     }
 
     public void run() {
@@ -25,7 +27,7 @@ public class ServerThread extends Thread {
             while ((clientMessage = in.readLine()) != null) {
                 System.out.println(Thread.currentThread().getName() + ": received message: " + clientMessage);
                 // Process client messages here
-
+                System.out.println("serverthread receives: " + clientMessage);
                 if (clientMessage.equals("READY")) {
                     ready = true;
                     Server.incrementReadyCount();
@@ -34,6 +36,9 @@ public class ServerThread extends Thread {
                     Server.decrementReadyCount();
                 } else if (clientMessage.equals("STARTGAME")) {
                     Server.setGameStart(true);
+                } else if (clientMessage.equals("COLLISION")) {
+                    // TODO: notify the other players with their score(when that's implemented)
+                    Server.playerLoses(id);
                 }
             }
 
@@ -57,5 +62,9 @@ public class ServerThread extends Thread {
 
     public boolean isReady() {
         return ready;
+    }
+
+    public int getID() {
+        return id;
     }
 }
