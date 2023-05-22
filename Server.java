@@ -2,24 +2,23 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 public class Server {
     private static List<ServerThread> clientThreads = new ArrayList<>();
     private static int readyCount = 0;
     private static int clientCount = 0;
-    private static int remainingPlayers = 0;
-    private static volatile boolean gameStart = false;
-    private static Obstacle[] obstacles = {new Obstacle(300,370,15,30),
-                                            new Obstacle(500,370,15,30),
-                                            new Obstacle(800,370,15,30)};
-    private static TreeMap<Integer, Integer> scores = new TreeMap<>();
+    private static int remainingPlayers = -1;
+    private static volatile boolean gameStart;
+    private static Obstacle[] obstacles = {new Obstacle(300,370,15,30),new Obstacle(500,370,15,30),new Obstacle(800,370,15,30)};
+    private static Powerup powerup = new Powerup(350,370,15,30);
+    private static boolean powerUpOn = false;
+    private static int powerUpPlayer = -1;
 
-    public Server() {
-
+    public Server(){
+        gameStart = false;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         int portNumber = 1024;
         ServerSocket serverSocket = new ServerSocket(portNumber);
 
@@ -48,8 +47,6 @@ public class Server {
         });
         clientAcceptanceThread.start();
 
-
-
         // Wait for the game to start
         while (!gameStart) {
             try {
@@ -67,7 +64,6 @@ public class Server {
 
         // Start the game logic
         remainingPlayers = clientCount;
-
         while (gameStart) {
             try {
                 Thread.sleep(20);
@@ -79,11 +75,20 @@ public class Server {
                     }
                 }
 
-                broadcastObstacleMessage();
-                if (remainingPlayers == 0) {
-                    endGame();
-                    gameStart = false;
+                if ((int)(Math.random()*200)+1 == 1 && !powerUpOn){
+                    System.out.println("POWERUP");
+                    powerUpOn = true;
+                    powerUpPlayer = (int)(Math.random()*clientThreads.size());
                 }
+                if (powerUpOn){
+                    powerup.setX(powerup.getX()-5);
+                    if (powerup.getX() < -powerup.getWidth()){
+                        powerUpOn = false;
+                    }
+                    broadcastPowerUpMessage();
+                }
+
+                broadcastObstacleMessage();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -95,10 +100,6 @@ public class Server {
         // Decrement readyCount if the client had pressed the "ready" button
         if (thread.isReady()) {
             readyCount--;
-        }
-        clientCount--;
-        if (gameStart) {
-            remainingPlayers--;
         }
         // Broadcast the updated client count and ready count to all clients
         broadcastReadyMessage();
@@ -114,31 +115,16 @@ public class Server {
             thread.sendMessage(msg);
         }
         System.out.println("server -> serverthread : " + msg);
+
     }
 
-    public static void playerLoses(int id, int score) {
-        scores.put(id, score);
+    public static void playerLoses(int id) {
         remainingPlayers--;
         for (ServerThread thread : clientThreads) {
             System.out.println("threadid vs id: " + thread.getID() + " " + id);
             if (thread.getID() != id) {
-                thread.sendMessage("PLAYERLOST " + id + " " + score);
+                thread.sendMessage("PLAYERLOST " + id);
             }
-        }
-    }
-
-    public static void endGame() {
-        System.out.println(scores);
-        int highestScore = 0;
-        int winnerID = 0;
-        for (int i = 0; i < scores.size(); i++) {
-            if (scores.get(i) > highestScore) {
-                highestScore = scores.get(i);
-                winnerID = i;
-            }
-        }
-        for (ServerThread thread : clientThreads) {
-            thread.sendMessage("GAMEOVER " + winnerID + " " + highestScore);
         }
     }
 
@@ -149,6 +135,12 @@ public class Server {
                 msg += " " + obstacles[i].getX() + " " + obstacles[i].getY();
             }
             thread.sendMessage(msg);
+        }
+    }
+
+    public static void broadcastPowerUpMessage(){
+        if (clientThreads.get(powerUpPlayer).isAlive()) {
+            clientThreads.get(powerUpPlayer).sendMessage("POWERUP " + powerup.getX() + " " + powerup.getY());
         }
     }
 
