@@ -40,6 +40,9 @@ public class ServerThread extends Thread {
                     // TODO: notify the other players with their score(when that's implemented)
                     Server.playerLoses(id);
                 }
+                else if (clientMessage.equals("POWERUPCOLLECTED")){
+                    // TODO: Apply powerup effect
+                }
             }
 
             in.close();
@@ -68,3 +71,4 @@ public class ServerThread extends Thread {
         return id;
     }
 }
+
