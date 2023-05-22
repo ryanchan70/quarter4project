@@ -11,11 +11,11 @@ import java.awt.event.KeyListener;
 public class ClientScreen extends JPanel implements ActionListener, KeyListener {
     private Client client;
     private JButton readyButton;
-    private int numReady, numClients, jumpStrength;
+    private int numReady, numClients, jumpStrength, score;
     private boolean ready, startGame, gameOver, jumping;
     private Obstacle[] obstacles;
     private Player player;
-    private String opponentLog; // to display opponents who lost(and their score when that's implemented)
+    private String opponentLog;
 
     public ClientScreen() {
         startGame = false;
@@ -35,8 +35,8 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
 
         jumpStrength = 0;
         jumping = false;
-
         opponentLog = "";
+        score = 0;
 
         setLayout(null);
         setFocusable(true);
@@ -54,18 +54,22 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                 g.drawString("Welcome!", 300, 85);
                 g.setFont(new Font("SansSerif", Font.BOLD, 20));
                 g.drawString("Please wait for all players to press start.", 170, 175);
+                if (ready) {
+                    g.setColor(new Color(61, 152, 49));
+                }
                 g.drawString(numReady + "/" + numClients + " players ready", 300, 250);
             } else {
                 g.setColor(new Color(38, 41, 45));
                 g.fillRect(0, 0, 800, 600);
                 g.setColor(Color.white);
                 g.setFont(new Font("SansSerif", Font.BOLD, 40));
-                g.drawString("You lost...", 295, 85);
+                g.drawString("You died...", 295, 105);
                 g.setFont(new Font("SansSerif", Font.BOLD, 20));
-                g.drawString("Better luck next time!", 275, 175);
-                //g.drawString(numReady + "/" + numClients + " players ready", 300, 250);
+                g.drawString("Better luck next time!", 275, 165);
+                g.drawString("Your final score: " + score, 275, 300);
             }
         } else {
+            //temporary basic background
             g.setColor(new Color(229, 92, 62));
             g.fillRect(0, 0, 800, 600);
             g.setColor(new Color(141, 74, 26));
@@ -77,11 +81,12 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
             g.setColor(new Color(53, 155, 229));
             g.fillRect(player.getX(), player.getY(), 30, 30);
             g.setColor(Color.white);
-            g.setFont(new Font("SansSerif", Font.PLAIN, 14));
-            drawString(g, opponentLog, 650, 50);
+            g.setFont(new Font("SansSerif", Font.PLAIN, 18));
+            score += 2;
+            g.drawString("Score: " + score, 660, 30);
+            drawString(g, opponentLog, 630, 80);
 
             if (jumping) {
-                //System.out.println("jumping, jump strength = " + jumpStrength);
                 player.setY(player.getY() - jumpStrength); // Move the player on the y-axis based on the strength of the jump.
                 jumpStrength -= 2; // Gradually decrease the strength of the jump.
 
@@ -166,7 +171,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
     @Override
     public void keyPressed(KeyEvent e) {
         System.out.println(player.getY() + " vs " + (400-player.getHeight()));
-        if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP && player.getY() >= 400-player.getHeight()) { // Must be on the ground to jump.
+        if ((e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP) && player.getY() >= 400-player.getHeight()) { // Must be on the ground to jump.
             jumpStrength = 24; // upwards velocity
             jumping = true;
         }
