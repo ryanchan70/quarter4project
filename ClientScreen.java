@@ -11,8 +11,8 @@ import java.awt.event.KeyListener;
 public class ClientScreen extends JPanel implements ActionListener, KeyListener {
     private Client client;
     private JButton readyButton;
-    private int numReady, numClients, jumpStrength, score;
-    private boolean ready, startGame, gameOver, jumping;
+    private int id, numReady, numClients, jumpStrength, score, winnerScore;
+    private boolean ready, startGame, gameOver, jumping, winner;
     private Obstacle[] obstacles;
     private Player player;
     private String opponentLog;
@@ -35,6 +35,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
 
         jumpStrength = 0;
         jumping = false;
+        winner = false;
         opponentLog = "";
         score = 0;
 
@@ -53,20 +54,36 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                 g.setFont(new Font("SansSerif", Font.BOLD, 40));
                 g.drawString("Welcome!", 300, 85);
                 g.setFont(new Font("SansSerif", Font.BOLD, 20));
-                g.drawString("Please wait for all players to press start.", 170, 175);
+                g.drawString("Please wait for all players to press start.", 180, 175);
                 if (ready) {
                     g.setColor(new Color(61, 152, 49));
                 }
-                g.drawString(numReady + "/" + numClients + " players ready", 300, 250);
+                g.drawString(numReady + "/" + numClients + " players ready", 302, 250);
             } else {
-                g.setColor(new Color(38, 41, 45));
-                g.fillRect(0, 0, 800, 600);
-                g.setColor(Color.white);
-                g.setFont(new Font("SansSerif", Font.BOLD, 40));
-                g.drawString("You died...", 295, 105);
-                g.setFont(new Font("SansSerif", Font.BOLD, 20));
-                g.drawString("Better luck next time!", 275, 165);
-                g.drawString("Your final score: " + score, 275, 300);
+                if (winner) {
+                    g.setColor(new Color(183, 151, 0));
+                    g.fillRect(0, 0, 800, 600);
+                    g.setColor(new Color(255, 255, 255));
+                    g.setFont(new Font("SansSerif", Font.BOLD, 40));
+                    g.drawString("You won!!!", 295, 105);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 20));
+                    g.drawString("Congratulations, you got the highest score!", 178, 165);
+                    g.drawString("Your final score: " + score, 285, 300);
+                } else {
+                    g.setColor(new Color(38, 41, 45));
+                    g.fillRect(0, 0, 800, 600);
+                    g.setColor(Color.white);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 40));
+                    g.drawString("You died...", 295, 105);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 20));
+                    g.drawString("Your final score: " + score, 285, 300);
+                    if (winnerScore != 0) {
+                        g.drawString("Winner's score: " + winnerScore, 295, 350);
+                        g.drawString("Better luck next time!", 285, 165);
+                    } else {
+                        g.drawString("Waiting for other players to finish...", 205, 165);
+                    }
+                }
             }
         } else {
             //temporary basic background
@@ -99,7 +116,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
 
             for (int i = 0; i < obstacles.length; i++) {
                 if (player.checkCollision(obstacles[i].getX(), obstacles[i].getY(), obstacles[i].getWidth(), obstacles[i].getHeight())) {
-                    client.send("COLLISION");
+                    client.send("COLLISION " + score);
                     startGame = false;
                     gameOver = true;
                     break;
@@ -145,12 +162,25 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         }
     }
 
-    public void updateOpponentStatus(int id) {
-        opponentLog += "Player " + id + " has lost.\n";
+    public void updateOpponentStatus(int id, int opponentScore) {
+        opponentLog += "Player " + id + " has lost.\nFinal score: " + opponentScore;
+    }
+
+    public void gameOver(int winnerID, int winnerScore) {
+        if (id == winnerID) {
+            winner = true;
+        } else {
+            this.winnerScore = winnerScore;
+        }
     }
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+        System.out.println("ID was set to " + id);
     }
 
     public void setReady() {
@@ -174,6 +204,10 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         if ((e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP) && player.getY() >= 400-player.getHeight()) { // Must be on the ground to jump.
             jumpStrength = 24; // upwards velocity
             jumping = true;
+        } else if(e.getKeyCode() == KeyEvent.VK_D) { // TESTING CHEAT KEY
+            score += 500;
+        } else if(e.getKeyCode() == KeyEvent.VK_F) {
+            score -= 500;
         }
     }
 
