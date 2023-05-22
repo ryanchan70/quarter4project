@@ -11,6 +11,11 @@ public class Powerup {
         this.height = height;
     }
 
+    public Powerup(){
+        width = 15;
+        height = 30;
+    }
+
     public int getX(){
         return x;
     }
