@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Client extends JPanel {
     private String serverAddress;
-    private int serverPort, id;
+    private int serverPort;
     private Socket socket;
     private BufferedReader reader;
     private PrintWriter writer;
@@ -41,32 +41,27 @@ public class Client extends JPanel {
                 while ((response = client.reader.readLine()) != null) {
 
                     // SERVER RESPONSE HANDLING
-                    // System.out.println("serverthread -> client: " + response);
-                    if (response.startsWith("ID")) {
-                        response = response.substring(3);
-                        client.clientScreen.setId(Integer.parseInt(response));
-
-                    } else if (response.startsWith("READY")) {
+                    if(response.startsWith("READY")) {
                         response = response.substring(6);
                         String[] info = response.split("\\s+");
+                        //System.out.println("serverthread -> client: " + Arrays.toString(info));
                         client.clientScreen.updateReadyMessage(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
-
-                    } else if (response.startsWith("OBSTACLES")) {
+                    } else if(response.startsWith("OBSTACLES")) {
                         response = response.substring(10);
                         String[] info = response.split("\\s+");
+                        //System.out.println("serverthread -> client: " + Arrays.toString(info));
                         client.clientScreen.updateObstacles(info);
-
-                    } else if (response.startsWith("PLAYERLOST")) {
+                    } else if(response.startsWith("PLAYERLOST")) {
                         response = response.substring(11);
-                        String[] info = response.split("\\s+");
-                        client.clientScreen.updateOpponentStatus(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
-
-                    } else if (response.startsWith("GAMEOVER")){
-                        response = response.substring(9);
-                        String[] info = response.split("\\s+");
-                        client.clientScreen.gameOver(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
-                    } else {
                         System.out.println("serverthread -> client: " + response);
+                        client.clientScreen.updateOpponentStatus(Integer.parseInt(response));
+                    } else if(response.startsWith("POWERUP")) {
+                        response = response.substring(8);
+                        String[] info = response.split("\\s+");
+                        client.clientScreen.updatePowerUp(info);
+                        //TO DO: ClientScreen should activate a powerup
+                    } else {
+                        //System.out.println("serverthread -> client: " + response);
                     }
                 }
             } catch (Exception e) {
