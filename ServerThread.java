@@ -20,7 +20,7 @@ public class ServerThread extends Thread {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
             // Sends a message
-            sendMessage("Connection Successful!");
+            sendMessage("ID " + id);
 
             // Continuously listen for client messages
             String clientMessage;
@@ -36,11 +36,10 @@ public class ServerThread extends Thread {
                     Server.decrementReadyCount();
                 } else if (clientMessage.equals("STARTGAME")) {
                     Server.setGameStart(true);
-                } else if (clientMessage.equals("COLLISION")) {
-                    // TODO: notify the other players with their score(when that's implemented)
-                    Server.playerLoses(id);
-                }
-                else if (clientMessage.equals("POWERUPCOLLECTED")){
+                } else if (clientMessage.startsWith("COLLISION")) {
+                    int score = Integer.parseInt(clientMessage.substring(10));
+                    Server.playerLoses(id, score);
+                } else if (clientMessage.equals("POWERUPCOLLECTED")){
                     // TODO: Apply powerup effect
                 }
             }
@@ -71,4 +70,3 @@ public class ServerThread extends Thread {
         return id;
     }
 }
-
