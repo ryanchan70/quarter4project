@@ -1,11 +1,10 @@
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
 public class Server {
-    private static List<ServerThread> clientThreads = new ArrayList<>();
+    private static DLList<ServerThread> clientThreads = new DLList<>();
     private static int readyCount = 0;
     private static int clientCount = 0;
     private static int remainingPlayers = 0;
@@ -87,7 +86,7 @@ public class Server {
                 if ((int)(Math.random()*200)+1 == 1 && !powerUpOn){
                     System.out.println("POWERUP");
                     powerUpOn = true;
-                    powerUpPlayer = (int)(Math.random()*clientThreads.size());
+                    powerUpPlayer = (int)(Math.random()*clientThreads.getSize());
                 }
                 if (powerUpOn){
                     powerup.setX(powerup.getX()-5);
@@ -124,13 +123,13 @@ public class Server {
     }
 
     public static void broadcastReadyMessage() {
-        int clientCount = clientThreads.size();
+        int clientCount = clientThreads.getSize();
         String msg = "READY " + readyCount + " " + clientCount;
         if (readyCount == clientCount){
             gameStart = true;
         }
-        for (ServerThread thread : clientThreads) {
-            thread.sendMessage(msg);
+        for (int i = 0; i < clientThreads.getSize(); i++){
+            clientThreads.get(i).sendMessage(msg);
         }
         System.out.println("server -> serverthread : " + msg);
     }
@@ -138,10 +137,10 @@ public class Server {
     public static void playerLoses(int id, int score) {
         scores.put(id, score);
         remainingPlayers--;
-        for (ServerThread thread : clientThreads) {
-            System.out.println("threadid vs id: " + thread.getID() + " " + id);
-            if (thread.getID() != id) {
-                thread.sendMessage("PLAYERLOST " + id + " " + score);
+        for (int i = 0; i < clientThreads.getSize(); i++) {
+            System.out.println("threadid vs id: " + clientThreads.get(i).getID() + " " + id);
+            if (clientThreads.get(i).getID() != id) {
+                clientThreads.get(i).sendMessage("PLAYERLOST " + id + " " + score);
             }
         }
     }
@@ -172,18 +171,18 @@ public class Server {
                 winnerID = i;
             }
         }
-        for (ServerThread thread : clientThreads) {
-            thread.sendMessage("GAMEOVER " + winnerID + " " + highestScore);
+        for (int i = 0; i < clientThreads.getSize(); i++){
+            clientThreads.get(i).sendMessage("GAMEOVER " + winnerID + " " + highestScore);
         }
     }
 
     public static void broadcastObstacleMessage(){
-        for (ServerThread thread : clientThreads) {
+        for (int j = 0; j < clientThreads.getSize(); j++) {
             String msg = "OBSTACLES";
             for (int i = 0; i < obstacles.length; i++) {
                 msg += " " + obstacles[i].getX() + " " + obstacles[i].getY();
             }
-            thread.sendMessage(msg);
+            clientThreads.get(j).sendMessage(msg);
         }
     }
 
@@ -208,3 +207,4 @@ public class Server {
         System.out.println("GAMESTART was set to " + Server.gameStart);
     }
 }
+
