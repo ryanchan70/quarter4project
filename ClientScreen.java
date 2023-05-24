@@ -1,22 +1,16 @@
 import javax.swing.*;
-import java.awt.Graphics;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
 
 public class ClientScreen extends JPanel implements ActionListener, KeyListener {
     private Client client;
     private JButton readyButton;
-    private int id, numReady, numClients, jumpStrength, score, winnerScore;
-    private boolean ready, startGame, gameOver, jumping, winner, powerUpActivated;
+    private int id, numReady, numClients, jumpStrength, score, winnerScore, scoreMultiplier;
+    private boolean ready, startGame, gameOver, jumping, winner, powerUpActivated, gravity, invincibility;
     private Obstacle[] obstacles;
     private Powerup powerUp;
     private Player player;
-    private String opponentLog;
+    private String powerupLog, opponentLog;
 
     public ClientScreen() {
         startGame = false;
@@ -38,8 +32,13 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         jumpStrength = 0;
         jumping = false;
         winner = false;
+        powerupLog = "";
         opponentLog = "";
         score = 0;
+
+        scoreMultiplier = 1;
+        gravity = false;
+        invincibility = false;
 
         setLayout(null);
         setFocusable(true);
@@ -101,13 +100,20 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                 g.setColor(new Color(255, 147, 147));
                 g.fillRect(powerUp.getX(), powerUp.getY(), powerUp.getWidth(), powerUp.getHeight());
             }
+            if (invincibility) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setStroke(new BasicStroke(3));
+                g2.setColor(new Color(234, 124, 216));
+                g2.drawOval(player.getX() - 10, player.getY() - 10, player.getWidth() + 20, player.getHeight() + 20);
+            }
             g.setColor(new Color(53, 155, 229));
             g.fillRect(player.getX(), player.getY(), 30, 30);
             g.setColor(Color.white);
             g.setFont(new Font("SansSerif", Font.PLAIN, 18));
-            score += 2;
+            score += (2 * scoreMultiplier);
             g.drawString("Score: " + score, 660, 30);
-            drawString(g, opponentLog, 630, 80);
+            g.drawString(powerupLog, 400, 30);
+            drawString(g, opponentLog, 630, 60);
 
             if (jumping) {
                 player.setY(player.getY() - jumpStrength); // Move the player on the y-axis based on the strength of the jump.
@@ -120,14 +126,24 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                 }
             }
 
-            for (int i = 0; i < obstacles.length; i++) {
-                if (player.checkCollision(obstacles[i].getX(), obstacles[i].getY(), obstacles[i].getWidth(), obstacles[i].getHeight())) {
-                    client.send("COLLISION " + score);
-                    startGame = false;
-                    gameOver = true;
-                    break;
+            if (!invincibility) {
+                for (int i = 0; i < obstacles.length; i++) {
+                    if (player.checkCollision(obstacles[i].getX(), obstacles[i].getY(), obstacles[i].getWidth(), obstacles[i].getHeight())) {
+                        client.send("COLLISION " + score);
+                        startGame = false;
+                        gameOver = true;
+                        break;
+                    }
                 }
             }
+
+            if (powerUpActivated) {
+                if (player.checkCollision(powerUp.getX(), powerUp.getY(), powerUp.getWidth(), powerUp.getHeight())) {
+                    client.send("POWERUPCOLLECTED");
+                    powerUpActivated = false;
+                }
+            }
+
         }
 
         try {
@@ -174,6 +190,36 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         powerUp.setY(Integer.parseInt(powerUpInfo[1]));
     }
 
+    public void activatePowerup(String type) {
+        Thread delayedThread = new Thread(() -> {
+            try {
+                if (type.equals("SCOREMULTIPLIER")) {
+                    scoreMultiplier = 200;
+                    powerupLog = "2X score";
+                    Thread.sleep(5000);
+                    scoreMultiplier = 1;
+                    powerupLog = "";
+                } else if (type.equals("GRAVITY")) {
+                    gravity = true;
+                    powerupLog = "activatable gravity";
+                    Thread.sleep(10000);
+                    gravity = false;
+                    powerupLog = "";
+                } else if (type.equals("INVINCIBILITY")) {
+                    invincibility = true;
+                    powerupLog = "invincibility";
+                    Thread.sleep(5000);
+                    invincibility = false;
+                    powerupLog = "";
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        delayedThread.start();
+    }
+
     public void updateOpponentStatus(int id, int opponentScore) {
         opponentLog += "Player " + id + " has lost.\nFinal score: " + opponentScore;
     }
@@ -207,17 +253,19 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
             }
         }
     }
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if ((e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP) && player.getY() >= 400-player.getHeight()) { // Must be on the ground to jump.
             jumpStrength = 24; // upwards velocity
             jumping = true;
-        } else if(e.getKeyCode() == KeyEvent.VK_D) { // TESTING CHEAT KEY
+        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            if (gravity) {
+                jumpStrength = -24;
+            }
+        }
+
+        else if(e.getKeyCode() == KeyEvent.VK_D) { // TESTING CHEAT KEY
             score += 500;
         } else if(e.getKeyCode() == KeyEvent.VK_F) {
             score -= 500;
@@ -226,6 +274,11 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
 
     @Override
     public void keyReleased(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
 
     }
 
