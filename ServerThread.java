@@ -41,6 +41,7 @@ public class ServerThread extends Thread {
                     Server.playerLoses(id, score);
                 } else if (clientMessage.equals("POWERUPCOLLECTED")){
                     // TODO: Apply powerup effect
+                    Server.activatePowerup(id);
                 }
             }
 
