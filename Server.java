@@ -92,6 +92,8 @@ public class Server {
                 if (powerUpOn){
                     powerup.setX(powerup.getX()-5);
                     if (powerup.getX() < -powerup.getWidth()){
+                        powerup.setX(800);
+
                         powerUpOn = false;
                     }
                     broadcastPowerUpMessage();
@@ -141,6 +143,22 @@ public class Server {
             if (thread.getID() != id) {
                 thread.sendMessage("PLAYERLOST " + id + " " + score);
             }
+        }
+    }
+
+    public static void activatePowerup(int id) {
+        powerUpOn = false;
+        int effect = (int) (Math.random()*4); // larger obstacles, 2x score multiplier, g-belt, invincibility
+        if (effect == 0) {
+            // TODO: larger obstacles
+            clientThreads.get(id).sendMessage("LARGEROBSTACLES"); //not implemented yet
+            System.out.println("larger obstacles(not implemented yet)");
+        } else if (effect == 1) {
+            clientThreads.get(id).sendMessage("SCOREMULTIPLIER");
+        } else if (effect == 2) {
+            clientThreads.get(id).sendMessage("GRAVITY");
+        } else if (effect == 3) {
+            clientThreads.get(id).sendMessage("INVINCIBILITY");
         }
     }
 
