@@ -1,7 +1,6 @@
 import java.net.*;
 import java.io.*;
 import java.util.List;
-import java.util.TreeMap;
 
 public class Server {
     private static DLList<ServerThread> clientThreads = new DLList<>();
@@ -12,7 +11,7 @@ public class Server {
     private static Obstacle[] obstacles = {new Obstacle(300,370,15,30),
                                             new Obstacle(500,370,15,30),
                                             new Obstacle(800,370,15,30)};
-    private static TreeMap<Integer, Integer> scores = new TreeMap<>();
+    private static MyHashMap<Integer, Integer> scores = new MyHashMap<>();
     private static Powerup powerup = new Powerup(900,370,15,30);
     private static boolean powerUpOn = false;
     private static int powerUpPlayer = -1;
