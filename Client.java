@@ -59,7 +59,8 @@ public class Client extends JPanel {
                         response = response.substring(8);
                         String[] info = response.split("\\s+");
                         client.clientScreen.updatePowerUp(info);
-                        //TO DO: ClientScreen should activate a powerup
+                    } else if(response.equals("SCOREMULTIPLIER") || response.startsWith("GRAVITY") || response.startsWith("INVINCIBILITY")) {
+                        client.clientScreen.activatePowerup(response);
                     } else if (response.startsWith("PLAYERLOST")) {
                         response = response.substring(11);
                         String[] info = response.split("\\s+");
