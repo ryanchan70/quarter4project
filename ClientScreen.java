@@ -194,7 +194,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         Thread delayedThread = new Thread(() -> {
             try {
                 if (type.equals("SCOREMULTIPLIER")) {
-                    scoreMultiplier = 200;
+                    scoreMultiplier = 2;
                     powerupLog = "2X score";
                     Thread.sleep(5000);
                     scoreMultiplier = 1;
