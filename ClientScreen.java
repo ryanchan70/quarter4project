@@ -1,6 +1,10 @@
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 
 public class ClientScreen extends JPanel implements ActionListener, KeyListener {
     private Client client;
@@ -229,8 +233,10 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         System.out.println("me: " + id + " " + score);
         if (id == winnerID) {
             winner = true;
+            playSound("sfx-win");
         } else {
             this.winnerScore = winnerScore;
+            playSound("sfx-lose");
         }
     }
 
@@ -269,6 +275,19 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
             score += 500;
         } else if(e.getKeyCode() == KeyEvent.VK_F) {
             score -= 500;
+        }
+    }
+
+    public void playSound(String name) {
+        String fileName = name + ".wav";
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(fileName).getAbsoluteFile());
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start();
+        } catch(Exception ex) {
+            System.out.println("Error with playing sound.");
+            ex.printStackTrace();
         }
     }
 
