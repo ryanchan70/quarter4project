@@ -8,9 +8,9 @@ import java.io.File;
 
 public class ClientScreen extends JPanel implements ActionListener, KeyListener {
     private Client client;
-    private JButton readyButton;
+    private JButton readyButton, instructionsButton;
     private int id, numReady, numClients, jumpStrength, score, winnerScore, scoreMultiplier;
-    private boolean ready, startGame, gameOver, jumping, winner, powerUpActivated, gravity, invincibility;
+    private boolean instructions, ready, startGame, gameOver, jumping, winner, powerUpActivated, gravity, invincibility;
     private Obstacle[] obstacles;
     private Powerup powerUp;
     private Player player;
@@ -19,10 +19,15 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
     public ClientScreen() {
         startGame = false;
         readyButton = new JButton("Ready");
-        readyButton.setBounds(350, 500, 100, 30);
+        readyButton.setBounds(350, 425, 100, 30);
         add(readyButton);
         readyButton.addActionListener(this);
+        instructionsButton = new JButton("Instructions");
+        instructionsButton.setBounds(335, 475, 130, 30);
+        add(instructionsButton);
+        instructionsButton.addActionListener(this);
 
+        instructions = false;
         ready = false;
         gameOver = false;
 
@@ -53,17 +58,36 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         super.paintComponent(g);
         if (!startGame) {
             if (!gameOver) {
-                g.setColor(new Color(38, 41, 45));
-                g.fillRect(0, 0, 800, 600);
-                g.setColor(Color.white);
-                g.setFont(new Font("SansSerif", Font.BOLD, 40));
-                g.drawString("Welcome!", 300, 85);
-                g.setFont(new Font("SansSerif", Font.BOLD, 20));
-                g.drawString("Please wait for all players to press start.", 180, 175);
-                if (ready) {
-                    g.setColor(new Color(61, 152, 49));
+                if(instructions) {
+                    g.setColor(new Color(85, 92, 100));
+                    g.fillRect(0, 0, 800, 600);
+                    g.setColor(Color.white);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 40));
+                    g.drawString("Instructions", 280, 85);
+                    g.setFont(new Font("SansSerif", Font.PLAIN, 18));
+                    drawString(g, "Multiplayer Dinosaur Game is a 2D endless runner platformer, inspired by the\n"
+                        + "widely popular Chrome dinosaur game. Survive as long as you can and earn\n"
+                        + "more points than your opponent to win.\n\n"
+                        + "Press W or the space bar to jump.\n"
+                        + "Avoid hitting the green blocks(obstacles) to stay alive.\n"
+                        + "Pick up occasional powerups(pink blocks) to increase your chances of winning.\n\n"
+                        + "Powerups:\n"
+                        + "  •  activatable gravity for 10 seconds(S or down arrow key)\n"
+                        + "  •  2X score multiplier for 5 seconds\n"
+                        + "  •  invincibility for 5 seconds\n" , 50, 120);
+                } else {
+                    g.setColor(new Color(38, 41, 45));
+                    g.fillRect(0, 0, 800, 600);
+                    g.setColor(Color.white);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 40));
+                    g.drawString("Welcome!", 300, 85);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 20));
+                    g.drawString("Please wait for all players to press start.", 188, 175);
+                    if (ready) {
+                        g.setColor(new Color(61, 152, 49));
+                    }
+                    g.drawString(numReady + "/" + numClients + " players ready", 305, 275);
                 }
-                g.drawString(numReady + "/" + numClients + " players ready", 302, 250);
             } else {
                 if (winner) {
                     g.setColor(new Color(183, 151, 0));
@@ -161,11 +185,24 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         if (e.getSource() == readyButton) {
             if (ready) {
                 readyButton.setText("Ready");
+                instructionsButton.setVisible(true);
             } else {
                 readyButton.setText("Cancel");
+                instructionsButton.setVisible(false);
             }
             ready = !ready;
             setReady();
+        } else if (e.getSource() == instructionsButton) {
+            instructions = !instructions;
+            if (instructions) {
+                instructionsButton.setText("Back");
+                instructionsButton.setBounds(350, 525, 100, 30);
+                readyButton.setVisible(false);
+            } else {
+                instructionsButton.setText("Instructions");
+                instructionsButton.setBounds(335, 475, 130, 30);
+                readyButton.setVisible(true);
+            }
         }
     }
 
@@ -262,10 +299,11 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if ((e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP) && player.getY() >= 400-player.getHeight()) { // Must be on the ground to jump.
+        if ((e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W)
+                && player.getY() >= 400-player.getHeight()) { // Must be on the ground to jump.
             jumpStrength = 24; // upwards velocity
             jumping = true;
-        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+        } else if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
             if (gravity) {
                 jumpStrength = -24;
             }
