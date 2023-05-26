@@ -12,6 +12,7 @@ public class Client extends JPanel {
     private PrintWriter writer;
     private ClientScreen clientScreen;
     private boolean ready;
+    private static int restartCount = 0;
 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
@@ -70,9 +71,12 @@ public class Client extends JPanel {
                         response = response.substring(9);
                         String[] info = response.split("\\s+");
                         client.clientScreen.gameOver(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
+                    } else if (response.startsWith("RESTART")) {
+                        restartCount++;
                     } else {
                         System.out.println("serverthread -> client: " + response);
                     }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
