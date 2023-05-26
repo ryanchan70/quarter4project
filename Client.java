@@ -73,6 +73,8 @@ public class Client extends JPanel {
                         client.clientScreen.gameOver(Integer.parseInt(info[0]), Integer.parseInt(info[1]));
                     } else if (response.startsWith("RESTART")) {
                         restartCount++;
+                        // TO DO: Check if restart count is equal to the number of players
+                        // If so, then restart all clients as well as server
                     } else {
                         System.out.println("serverthread -> client: " + response);
                     }
