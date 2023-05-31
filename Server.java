@@ -147,10 +147,16 @@ public class Server {
     public static void activatePowerup(int id) {
         powerUpOn = false;
         int effect = (int) (Math.random()*4); // larger obstacles, 2x score multiplier, g-belt, invincibility
+        //temp
+        effect = 0;
         if (effect == 0) {
-            // TODO: larger obstacles
-            clientThreads.get(id).sendMessage("LARGEROBSTACLES"); //not implemented yet
-            System.out.println("larger obstacles(not implemented yet)");
+            for (int i = 0; i < clientThreads.getSize(); i++){
+                //change this
+                if (i != id) {
+                    clientThreads.get(i).sendMessage("INCREASEHEIGHT");
+                }
+            }
+            //not implemented yet
         } else if (effect == 1) {
             clientThreads.get(id).sendMessage("SCOREMULTIPLIER");
         } else if (effect == 2) {
