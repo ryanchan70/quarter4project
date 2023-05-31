@@ -147,8 +147,6 @@ public class Server {
     public static void activatePowerup(int id) {
         powerUpOn = false;
         int effect = (int) (Math.random()*4); // larger obstacles, 2x score multiplier, g-belt, invincibility
-        //temp
-        effect = 0;
         if (effect == 0) {
             for (int i = 0; i < clientThreads.getSize(); i++){
                 //change this
