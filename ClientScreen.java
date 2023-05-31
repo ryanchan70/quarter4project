@@ -11,6 +11,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
     private JButton readyButton;
     private int id, numReady, numClients, jumpStrength, score, winnerScore, scoreMultiplier;
     private boolean ready, startGame, gameOver, jumping, winner, powerUpActivated, gravity, invincibility;
+    private int heightMultiplier;
     private Obstacle[] obstacles;
     private Powerup powerUp;
     private Player player;
@@ -50,6 +51,8 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         scoreMultiplier = 1;
         gravity = false;
         invincibility = false;
+        heightMultiplier = 1;
+
 
         setLayout(null);
         setFocusable(true);
@@ -106,7 +109,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
             g.fillRect(0, 400, 800, 200);
             g.setColor(new Color(52, 168, 117));
             for (int i = 0; i < obstacles.length; i++) {
-                g.fillRect(obstacles[i].getX(), obstacles[i].getY(), obstacles[i].getWidth(), obstacles[i].getHeight());
+                g.fillRect(obstacles[i].getX(), obstacles[i].getY()-(heightMultiplier-1)*20, obstacles[i].getWidth(), obstacles[i].getHeight()*heightMultiplier);
             }
             if (powerUpActivated) {
                 g.setColor(new Color(255, 147, 147));
@@ -140,7 +143,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
 
             if (!invincibility) {
                 for (int i = 0; i < obstacles.length; i++) {
-                    if (player.checkCollision(obstacles[i].getX(), obstacles[i].getY(), obstacles[i].getWidth(), obstacles[i].getHeight())) {
+                    if (player.checkCollision(obstacles[i].getX(), obstacles[i].getY()-(heightMultiplier-1)*20, obstacles[i].getWidth(), obstacles[i].getHeight()*heightMultiplier)) {
                         client.send("COLLISION " + score);
                         startGame = false;
                         gameOver = true;
@@ -226,6 +229,12 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                     Thread.sleep(5000);
                     invincibility = false;
                     powerupLog = "";
+                } else if (type.equals("INCREASEHEIGHT")){
+                    System.out.println("HELLO");
+                    powerupLog = "height increase";
+                    heightMultiplier = 2;
+                    Thread.sleep(10000);
+                    heightMultiplier = 1;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
