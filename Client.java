@@ -60,7 +60,7 @@ public class Client extends JPanel {
                         response = response.substring(8);
                         String[] info = response.split("\\s+");
                         client.clientScreen.updatePowerUp(info);
-                    } else if(response.equals("SCOREMULTIPLIER") || response.startsWith("GRAVITY") || response.startsWith("INVINCIBILITY")) {
+                    } else if(response.equals("SCOREMULTIPLIER") || response.startsWith("GRAVITY") || response.startsWith("INVINCIBILITY") || response.startsWith("INCREASEHEIGHT")) {
                         client.clientScreen.activatePowerup(response);
                     } else if (response.startsWith("PLAYERLOST")) {
                         response = response.substring(11);
