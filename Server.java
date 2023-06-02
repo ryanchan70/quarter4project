@@ -10,7 +10,7 @@ public class Server {
     private static volatile boolean gameStart = false;
     private static Obstacle[] obstacles = {new Obstacle(300,370,15,30),
                                             new Obstacle(500,370,15,30),
-                                            new Obstacle(800,370,15,30)};
+                                            new Obstacle(700,370,15,30)};
     private static MyHashMap<Integer, Integer> scores = new MyHashMap<>();
     private static Powerup powerup = new Powerup(900,370,15,30);
     private static boolean powerUpOn = false;
@@ -68,41 +68,44 @@ public class Server {
 
         // Start the game logic
         remainingPlayers = clientCount;
+        while (true){
+            while (gameStart) {
+                try {
+                    Thread.sleep(20);
 
-        while (gameStart) {
-            try {
-                Thread.sleep(20);
-
-                for (int i = 0; i < 3; i++) {
-                    obstacles[i].setX(obstacles[i].getX() - 5);
-                    if(obstacles[i].getX() < -obstacles[i].getWidth()) {
-                        obstacles[i].setX(900);
+                    for (int i = 0; i < 3; i++) {
+                        obstacles[i].setX(obstacles[i].getX() - 5);
+                        if (obstacles[i].getX() < -obstacles[i].getWidth()) {
+                            obstacles[i].setX(900);
+                        }
                     }
-                }
 
-                broadcastObstacleMessage();
+                    broadcastObstacleMessage();
 
-                if ((int)(Math.random()*200)+1 == 1 && !powerUpOn){
-                    System.out.println("POWERUP");
-                    powerUpOn = true;
-                    powerUpPlayer = (int)(Math.random()*clientThreads.getSize());
-                }
-                if (powerUpOn){
-                    powerup.setX(powerup.getX()-5);
-                    if (powerup.getX() < -powerup.getWidth()){
-                        powerup.setX(800);
-
-                        powerUpOn = false;
+                    if ((int) (Math.random() * 200) + 1 == 1 && !powerUpOn) {
+                        System.out.println("POWERUP");
+                        powerUpOn = true;
+                        powerUpPlayer = (int) (Math.random() * clientThreads.getSize());
                     }
-                    broadcastPowerUpMessage();
-                }
+                    if (powerUpOn) {
+                        powerup.setX(powerup.getX() - 5);
+                        if (powerup.getX() < -powerup.getWidth()) {
+                            powerup.setX(800);
 
-                if (remainingPlayers == 0) {
-                    endGame();
-                    gameStart = false;
+                            powerUpOn = false;
+                        }
+                        broadcastPowerUpMessage();
+                    }
+                    System.out.println("REMAINING :" + remainingPlayers);
+                    if (remainingPlayers == 0) {
+                        System.out.println("END GAME");
+                        endGame();
+                        gameStart = false;
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -208,6 +211,17 @@ public class Server {
     public static void setGameStart(boolean gameStart) {
         Server.gameStart = gameStart;
         System.out.println("GAMESTART was set to " + Server.gameStart);
+    }
+
+    public static void restartClients(){
+        gameStart = true;
+        for (int i = 0; i < clientThreads.getSize(); i++){
+            clientThreads.get(i).restart();
+        }
+        System.out.println(scores.toString());
+        scores = new MyHashMap<>();
+        System.out.println("True");
+        remainingPlayers = 3;
     }
 }
 
