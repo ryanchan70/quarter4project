@@ -75,6 +75,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                 }
                 g.drawString(numReady + "/" + numClients + " players ready", 302, 250);
             } else {
+                restartGame.setVisible(true);
                 if (winner) {
                     g.setColor(new Color(183, 151, 0));
                     g.fillRect(0, 0, 800, 600);
@@ -85,7 +86,6 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                     g.drawString("Congratulations, you got the highest score!", 178, 165);
                     g.drawString("Your final score: " + score, 285, 300);
                 } else {
-                    restartGame.setVisible(true);
                     g.setColor(new Color(38, 41, 45));
                     g.fillRect(0, 0, 800, 600);
                     g.setColor(Color.white);
@@ -180,6 +180,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         }
         else if (e.getSource() == restartGame){
             client.send("RESTART GAME");
+            winnerScore = 0;
         }
     }
 
@@ -330,5 +331,21 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
 
     public Dimension getPreferredSize() {
         return new Dimension(800, 600);
+    }
+    public void reset(){
+        score = 0;
+        scoreMultiplier = 1;
+        gravity = false;
+        invincibility = false;
+        heightMultiplier = 1;
+        gameOver = false;
+        startGame = true;
+        for (int i = 0; i < obstacles.length; i++){
+            obstacles[i].setX(300+200*(i+1));
+            obstacles[i].setY(370);
+        }
+        restartGame.setVisible(false);
+        opponentLog = "";
+        winner = false;
     }
 }
