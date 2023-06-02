@@ -43,6 +43,10 @@ public class ServerThread extends Thread {
                     // TODO: Apply powerup effect
                     Server.activatePowerup(id);
                 }
+                else if (clientMessage.equals("RESTART GAME")){
+                    System.out.println("RESTART SERVER");
+                    Server.restartClients();
+                }
             }
 
             in.close();
@@ -69,5 +73,8 @@ public class ServerThread extends Thread {
 
     public int getID() {
         return id;
+    }
+    public void restart(){
+        sendMessage("RESTARTSCREEN");
     }
 }
