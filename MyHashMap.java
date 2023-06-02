@@ -39,4 +39,12 @@ public class MyHashMap<K,V>{
     public MyHashSet<K> keySet(){
         return keySet;
     }
+
+    public String toString(){
+        String str = "";
+        for (int i = 0 ; i < keySet.size(); i++){
+            str += keySet.toArray()[i] + " " + get(keySet.toArray()[i]) + "\n";
+        }
+        return str;
+    }
 }
