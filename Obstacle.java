@@ -39,4 +39,7 @@ public class Obstacle {
     public int getHeight(){
         return height;
     }
+    public void reset(){
+
+    }
 }
