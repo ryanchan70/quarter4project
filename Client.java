@@ -27,7 +27,7 @@ public class Client extends JPanel {
     }
 
     public static void main(String[] args) {
-        String serverAddress = "localhost";
+        String serverAddress = "10.210.76.195";
         int serverPort = 1024;
         Client client = new Client(serverAddress, serverPort);
         client.connect();
