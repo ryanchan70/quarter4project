@@ -8,15 +8,15 @@ import java.io.File;
 
 public class ClientScreen extends JPanel implements ActionListener, KeyListener {
     private Client client;
-    private JButton readyButton;
+    private JButton readyButton, instructionsButton;
     private int id, numReady, numClients, jumpStrength, score, winnerScore, scoreMultiplier;
-    private boolean ready, startGame, gameOver, jumping, winner, powerUpActivated, gravity, invincibility;
+    private boolean ready, startGame, gameOver, jumping, winner, powerUpActivated, gravity, invincibility, instructions;
     private int heightMultiplier;
     private Obstacle[] obstacles;
     private Powerup powerUp;
     private Player player;
     private String powerupLog, opponentLog;
-    private JButton restartGame;
+    private JButton restartButton;
 
     public ClientScreen() {
         startGame = false;
@@ -25,11 +25,18 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         add(readyButton);
         readyButton.addActionListener(this);
 
-        restartGame = new JButton("Restart");
-        restartGame.setBounds(350,500,100,30);
-        add(restartGame);
-        restartGame.addActionListener(this);
-        restartGame.setVisible(false);
+        restartButton = new JButton("Restart");
+        restartButton.setBounds(350,500,100,30);
+        add(restartButton);
+        restartButton.addActionListener(this);
+        restartButton.setVisible(false);
+
+        instructionsButton = new JButton("Instructions");
+        instructionsButton.setBounds(335, 475, 130, 30);
+        add(instructionsButton);
+        instructionsButton.addActionListener(this);
+
+        instructions = false;
 
         ready = false;
         gameOver = false;
@@ -63,19 +70,37 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
         super.paintComponent(g);
         if (!startGame) {
             if (!gameOver) {
-                g.setColor(new Color(38, 41, 45));
-                g.fillRect(0, 0, 800, 600);
-                g.setColor(Color.white);
-                g.setFont(new Font("SansSerif", Font.BOLD, 40));
-                g.drawString("Welcome!", 300, 85);
-                g.setFont(new Font("SansSerif", Font.BOLD, 20));
-                g.drawString("Please wait for all players to press start.", 180, 175);
-                if (ready) {
-                    g.setColor(new Color(61, 152, 49));
+                if(instructions) {
+                    g.setColor(new Color(85, 92, 100));
+                    g.fillRect(0, 0, 800, 600);
+                    g.setColor(Color.white);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 40));
+                    g.drawString("Instructions", 280, 85);
+                    g.setFont(new Font("SansSerif", Font.PLAIN, 18));
+                    drawString(g, "Multiplayer Dinosaur Game is a 2D endless runner platformer, inspired by the\n"
+                            + "widely popular Chrome dinosaur game. Survive as long as you can and earn\n"
+                            + "more points than your opponent to win.\n\n"
+                            + "Press W or the space bar to jump.\n"
+                            + "Avoid hitting the green blocks(obstacles) to stay alive.\n"
+                            + "Pick up occasional powerups(pink blocks) to increase your chances of winning.\n\n"
+                            + "Powerups:\n"
+                            + "  •  activatable gravity for 10 seconds(S or down arrow key)\n"
+                            + "  •  2X score multiplier for 5 seconds\n"
+                            + "  •  invincibility for 5 seconds\n" , 50, 120);
+                } else {
+                    g.setColor(new Color(38, 41, 45));
+                    g.fillRect(0, 0, 800, 600);
+                    g.setColor(Color.white);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 40));
+                    g.drawString("Welcome!", 300, 85);
+                    g.setFont(new Font("SansSerif", Font.BOLD, 20));
+                    g.drawString("Please wait for all players to press start.", 188, 175);
+                    if (ready) {
+                        g.setColor(new Color(61, 152, 49));
+                    }
+                    g.drawString(numReady + "/" + numClients + " players ready", 305, 275);
                 }
-                g.drawString(numReady + "/" + numClients + " players ready", 302, 250);
             } else {
-                restartGame.setVisible(true);
                 if (winner) {
                     g.setColor(new Color(183, 151, 0));
                     g.fillRect(0, 0, 800, 600);
@@ -86,6 +111,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
                     g.drawString("Congratulations, you got the highest score!", 178, 165);
                     g.drawString("Your final score: " + score, 285, 300);
                 } else {
+                    restartButton.setVisible(true);
                     g.setColor(new Color(38, 41, 45));
                     g.fillRect(0, 0, 800, 600);
                     g.setColor(Color.white);
@@ -177,10 +203,22 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
             }
             ready = !ready;
             setReady();
-        }
-        else if (e.getSource() == restartGame){
-            client.send("RESTART GAME");
-            winnerScore = 0;
+        } else if (e.getSource() == restartButton){
+            restartButton.setVisible(false);
+            readyButton.setVisible(true);
+            instructionsButton.setVisible(true);
+            gameOver = false;
+        } else if (e.getSource() == instructionsButton) {
+            instructions = !instructions;
+            if (instructions) {
+                instructionsButton.setText("Back");
+                instructionsButton.setBounds(350, 525, 100, 30);
+                readyButton.setVisible(false);
+            } else {
+                instructionsButton.setText("Instructions");
+                instructionsButton.setBounds(335, 475, 130, 30);
+                readyButton.setVisible(true);
+            }
         }
     }
 
@@ -191,6 +229,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
             startGame = true;
             client.send("STARTGAME"); //tells the serverthread to start game
             readyButton.setVisible(false);
+            instructionsButton.setVisible(false);
         }
         repaint();
     }
@@ -252,6 +291,8 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
     public void gameOver(int winnerID, int winnerScore) {
         System.out.println("cscreen: " + winnerID + " " + winnerScore);
         System.out.println("me: " + id + " " + score);
+        instructionsButton.setVisible(true);
+        restartButton.setVisible(true);
         if (id == winnerID) {
             winner = true;
             playSound("sfx-win");
@@ -344,7 +385,7 @@ public class ClientScreen extends JPanel implements ActionListener, KeyListener 
             obstacles[i].setX(300+200*(i+1));
             obstacles[i].setY(370);
         }
-        restartGame.setVisible(false);
+        restartButton.setVisible(false);
         opponentLog = "";
         winner = false;
     }
